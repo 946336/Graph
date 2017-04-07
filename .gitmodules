@@ -1,0 +1,3 @@
+[submodule "log"]
+	path = log
+	url = git@gitlab.com:946336-misc/log.git
