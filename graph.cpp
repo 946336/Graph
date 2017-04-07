@@ -2,7 +2,7 @@
 #define GRAPH_GRAPH_946336_CPP
 
 #include "graph.h"
-#include "log.h"
+#include "log/log.h"
 
 #include <iostream>
 #include <stdexcept>
@@ -29,24 +29,24 @@ static std::ostringstream builder;
 // Exception message builders
 // ------------------------------------------------------------------------
 
-template<typename T, class Compare>
-void Graph<T, Compare>::notMyNode(const Graph<T, Compare>::Node &node) const
+template<typename T, class Compare, class Alloc>
+void Graph<T, Compare, Alloc>::notMyNode(const Graph<T, Compare, Alloc>::Node &node) const
 {
     builder.flush();
     builder << "Origin node " << node.data << " not found in graph "
             << this->name() << std::endl;
 }
 
-template<typename T, class Compare>
-void Graph<T, Compare>::noSuchNode(const Graph<T, Compare>::Node &node) const
+template<typename T, class Compare, class Alloc>
+void Graph<T, Compare, Alloc>::noSuchNode(const Graph<T, Compare, Alloc>::Node &node) const
 {
     builder.flush();
     builder << "Node " << node.data
             << " is no longer valid in graph " << this->name() << std::endl;
 }
 
-template<typename T, class Compare>
-bool Graph<T, Compare>::isValid(const Graph<T, Compare>::Node &node,
+template<typename T, class Compare, class Alloc>
+bool Graph<T, Compare, Alloc>::isValid(const Graph<T, Compare, Alloc>::Node &node,
                                 const bool throw_on_error) const
 {
     // Do the nodes think they belong to me?
@@ -71,46 +71,55 @@ bool Graph<T, Compare>::isValid(const Graph<T, Compare>::Node &node,
     return true;
 }
 
+template<typename T, class Compare, class Alloc>
+std::vector<typename Graph<T, Compare, Alloc>::Node>&
+Graph<T, Compare, Alloc>::listFor(const size_t uid)
+{
+    return this->adjacency_list.at(uid);
+}
+
 // ------------------------------------------------------------------------
 // Graph implementation
 // ------------------------------------------------------------------------
 
-template<typename T, class Compare>
-Graph<T, Compare>::Graph(const Logger::Level l, const std::string &name,
+template<typename T, class Compare, class Alloc>
+Graph<T, Compare, Alloc>::Graph(const Logger::Level l, const std::string &name,
                          const bool no_newlines, std::ostream &sink)
     : log(l, name, no_newlines, sink)
 {
     // Nothing to do here
 }
 
-template<typename T, class Compare>
-Graph<T, Compare>::Graph::Graph(const Graph &src, const std::string &name)
+template<typename T, class Compare, class Alloc>
+Graph<T, Compare, Alloc>::Graph::Graph(const Graph &src,
+                                       const std::string &name)
 {
     this->adjacency_list = src->adjacency_list;
-    this->nodes = src->nodes;
 
-    if (name.empty()) {
-        this->log = src.log;
-    } else {
-        this->log = Logger(src.log, name);
+    // Duplicated nodes must correctly track their parents
+    this->nodes.reserve(src->nodes.length());
+    for (const auto &n : src->nodes) {
+        this->nodes.emplace_back(n.data, *this, n.uid);
     }
+
+    this->log = Logger(src.log, name.empty() ? src.log.name() : name);
 }
 
-template<typename T, class Compare>
-const std::string& Graph<T, Compare>::name() const
+template<typename T, class Compare, class Alloc>
+const std::string& Graph<T, Compare, Alloc>::name() const
 {
     return this->log.name();
 }
 
-template<typename T, class Compare>
-Graph<T, Compare>::~Graph()
+template<typename T, class Compare, class Alloc>
+Graph<T, Compare, Alloc>::~Graph()
 {
     // Nothing to do here
 }
 
 // Extends the outer adjacency list by one and adds an extra node
-template<typename T, class Compare>
-Graph<T, Compare>& Graph<T, Compare>::add(const T& value)
+template<typename T, class Compare, class Alloc>
+Graph<T, Compare, Alloc>& Graph<T, Compare, Alloc>::add(const T& value)
 {
     size_t n_nodes = this->nodes.size();
 
@@ -121,8 +130,8 @@ Graph<T, Compare>& Graph<T, Compare>::add(const T& value)
     return *this;
 }
 
-template<typename T, class Compare>
-void Graph<T, Compare>::print()
+template<typename T, class Compare, class Alloc>
+void Graph<T, Compare, Alloc>::print()
 {
     INFO(this->log, "Graph: ") << this->name() << '\n';
 
@@ -137,7 +146,7 @@ void Graph<T, Compare>::print()
 
         for (size_t endpoint = 0;
                 endpoint < this->adjacency_list.at(node_id).size();
-                ++ endpoint) {
+                ++endpoint) {
 
             if (!this->nodes.at(endpoint).active) continue;
 
@@ -149,9 +158,9 @@ void Graph<T, Compare>::print()
     INFO(this->log, "---------\n");
 }
 
-template<typename T, class Compare>
-typename Graph<T, Compare>::Node
-Graph<T, Compare>::find(const Graph::predicate pred) const
+template<typename T, class Compare, class Alloc>
+typename Graph<T, Compare, Alloc>::Node
+Graph<T, Compare, Alloc>::find(const Graph::predicate pred) const
 {
     for (auto const &node : this->nodes) {
         if (node.active and pred(node.data)) {
@@ -165,10 +174,10 @@ Graph<T, Compare>::find(const Graph::predicate pred) const
 }
 
 // This is a directed graph by default. Overload/inherit for undirected?
-template<typename T, class Compare>
-Graph<T, Compare>& Graph<T, Compare>::connect(
-        const Graph<T, Compare>::Node &from,
-        const Graph<T, Compare>::Node &to)
+template<typename T, class Compare, class Alloc>
+Graph<T, Compare, Alloc>& Graph<T, Compare, Alloc>::connect(
+        const Graph<T, Compare, Alloc>::Node &from,
+        const Graph<T, Compare, Alloc>::Node &to)
 {
     // Basically asserting
     this->isValid(from);
@@ -186,10 +195,10 @@ Graph<T, Compare>& Graph<T, Compare>::connect(
 }
 
 // This is a directed graph by default. Overload/inherit for undirected?
-template<typename T, class Compare>
-Graph<T, Compare>& Graph<T, Compare>::disconnect(
-        const Graph<T, Compare>::Node &from,
-        const Graph<T, Compare>::Node &to)
+template<typename T, class Compare, class Alloc>
+Graph<T, Compare, Alloc>& Graph<T, Compare, Alloc>::disconnect(
+        const Graph<T, Compare, Alloc>::Node &from,
+        const Graph<T, Compare, Alloc>::Node &to)
 {
     this->isValid(from);
     this->isValid(to);
@@ -213,31 +222,20 @@ Graph<T, Compare>& Graph<T, Compare>::disconnect(
     return *this;
 }
 
-template<typename T, class Compare>
-std::vector< typename Graph<T, Compare>::Node >
-Graph<T, Compare>::neighborsOf(const Graph<T, Compare>::Node &node) const
+template<typename T, class Compare, class Alloc>
+typename Graph<T, Compare, Alloc>::vector
+Graph<T, Compare, Alloc>::neighborsOf(const Graph<T, Compare, Alloc>::Node &node) const
 {
-    // Does the node think it belongs to me?
-    if (&node.parent() != this) {
-        this->NotMyNode(node);
-        ERROR(this->log, builder.str());
-        throw NotMyNode(builder.str());
-    }
-    // Do I think I have such a node?
-    if (!node.active or node.uid >= this->nodes.size()
-            or !this->nodes[node.uid].active) {
-        this->noSuchNode(node);
-        ERROR(this->log, builder.str());
-        throw NotMyNode(builder.str());
-    }
+    this->isValid(node);
 
     // This shouldn't ever go OOB on adjacency_list
     std::vector<size_t> ids = this->adjacency_list[node.uid];
-    std::vector< Graph<T, Compare>::Node > neighbors;
+    typename Graph<T, Compare, Alloc>::vector neighbors;
 
     for (const auto &i : ids) {
         if (this->nodes[i].active) {
-            neighbors.emplace_back(this->nodes[i].data, *this, i);
+            /* neighbors.emplace_back(this->nodes[i].data, *this, i); */
+            neighbors.push_back(this->nodes[i]);
         }
     }
 
@@ -245,8 +243,8 @@ Graph<T, Compare>::neighborsOf(const Graph<T, Compare>::Node &node) const
 }
 
 // Removes _all_ matching nodes
-template<typename T, class Compare>
-Graph<T, Compare>& Graph<T, Compare>::remove(const T& data)
+template<typename T, class Compare, class Alloc>
+Graph<T, Compare, Alloc>& Graph<T, Compare, Alloc>::remove(const T& data)
 {
     for (auto& n: this->nodes) {
         if (n.active and n.data == data) {
@@ -256,9 +254,9 @@ Graph<T, Compare>& Graph<T, Compare>::remove(const T& data)
     return *this;
 }
 
-template<typename T, class Compare>
-Graph<T, Compare>&
-Graph<T, Compare>::remove(const Graph<T, Compare>::Node &node)
+template<typename T, class Compare, class Alloc>
+Graph<T, Compare, Alloc>&
+Graph<T, Compare, Alloc>::remove(const Graph<T, Compare, Alloc>::Node &node)
 {
     // Does the node think it belongs to me?
     if (&node.parent() != this) {
@@ -274,19 +272,22 @@ Graph<T, Compare>::remove(const Graph<T, Compare>::Node &node)
         throw NoSuchNode(builder.str());
     }
 
-    this->nodes[node.uid].active = node.active = false;
+    using Node = Graph<T, Compare, Alloc>::Node;
+
+    /* this->nodes[node.uid].active = node.active = false; */
+    this->nodes[node.uid] = Node(node, Node::INACTIVE);
     return *this;
 }
 
-template<typename T, class Compare>
-Graph<T, Compare>& Graph<T, Compare>::Node::parent() const {
+template<typename T, class Compare, class Alloc>
+Graph<T, Compare, Alloc>& Graph<T, Compare, Alloc>::Node::parent() const {
     return this->parent_.get();
 }
 
 // Guarantee: If an exception thrown, the container is not changed
-template<typename T, class Compare>
-Graph<T, Compare>&
-Graph<T, Compare>::remove(const std::vector< Graph<T, Compare>::Node > &nodes)
+template<typename T, class Compare, class Alloc>
+Graph<T, Compare, Alloc>&
+Graph<T, Compare, Alloc>::remove(const std::vector< Graph<T, Compare, Alloc>::Node > &nodes)
 {
     // Check that all nodes are valid
     for (auto &node: nodes) {
@@ -310,8 +311,8 @@ Graph<T, Compare>::remove(const std::vector< Graph<T, Compare>::Node > &nodes)
     }
 }
 
-template<typename T, class Compare>
-Graph<T, Compare>& Graph<T, Compare>::cleanup()
+template<typename T, class Compare, class Alloc>
+Graph<T, Compare, Alloc>& Graph<T, Compare, Alloc>::cleanup()
 {
     // Idea: Atomically reassign node uids
     //      Can be done iteratively in-place (I think)
@@ -323,7 +324,7 @@ Graph<T, Compare>& Graph<T, Compare>::cleanup()
     // Move all "deleted" nodes to the end
     auto nodes_end = std::remove_if(this->nodes.begin(),
                                     this->nodes.end(),
-                                    [](typename Graph<T, Compare>::Node &n) {
+                                    [](typename Graph<T, Compare, Alloc>::Node &n) {
                                         return !n.active;
                                     });
 
@@ -396,6 +397,65 @@ Graph<T, Compare>& Graph<T, Compare>::cleanup()
     }
 
     return *this;
+}
+
+template<typename T, class Compare, class Alloc>
+bool Graph<T, Compare, Alloc>::areAdjacent(
+        const Graph<T, Compare, Alloc>::Node &lhs,
+        const Graph<T, Compare, Alloc>::Node &rhs) const
+{
+    this->isValid(lhs);
+    this->isValid(rhs);
+
+    if (this->adjacency_list[lhs].find(rhs) !=
+            this->adjacency_list[lhs].end()) {
+        return true;
+    }
+
+    if (this->adjacency_list[lhs].find(rhs) !=
+            this->adjacency_list[rhs].end()) {
+        return true;
+    }
+
+    return true;
+}
+
+template<typename T, class Compare, class Alloc>
+bool Graph<T, Compare, Alloc>::isMine(
+        const Graph<T, Compare, Alloc>::Node &node) const
+{
+    return this->isValid(node, false);
+}
+
+template<typename T, class Compare, class Alloc>
+Vector<T, Alloc>
+Graph<T, Compare, Alloc>::filter(const Graph::predicate pred) const
+{
+    Vector<T, Alloc> data;
+
+    for (const Graph<T, Compare, Alloc>::Node &n : this->nodes) {
+        if (pred(n.data)) {
+            data.emplace_back(data);
+        }
+    }
+
+    return data;
+}
+
+template<typename T, class Compare, class Alloc>
+typename Graph<T, Compare, Alloc>::vector
+Graph<T, Compare, Alloc>::mask(const Graph::predicate pred)
+{
+    Graph<T, Compare, Alloc>::vector nodes;
+
+    for (const Graph<T, Compare, Alloc>::Node &n : this->nodes) {
+        if (pred(n.data)) {
+            /* nodes.emplace_back(n.data, *this, n.uid); */
+            nodes.push_back(Node(n.data, *this, n.uid));
+        }
+    }
+
+    return nodes;
 }
 
 #endif

@@ -9,8 +9,8 @@ int main(int argc, char **argv)
 
     Logger l(Logger::Level::DEBUG, "Hello", true, std::cerr);
 
-    LOG(l, "HELLO") << " THERE" << '\n';
-    LOG(l, "AAAAAAAAAAAA") << 3 << '\n';
+    INFO(l, "HELLO") << " THERE" << '\n';
+    INFO(l, "AAAAAAAAAAAA") << 3 << '\n';
 
     return 0;
 }

@@ -1,29 +1,32 @@
 
 CXX ?= g++
-CXXFLAGS += -Wall -Wextra -Werror -pedantic -std=c++14 -g
+CXXFLAGS ?= -Wall -Wextra -Werror -pedantic
+CXXFLAGS += -std=c++14 -g
 
 LOG_DIR = log
+LOG_DEPS = $(LOG_DIR)/log.h $(LOG_DIR)/log.cpp
+# Non-header log components
+LOG_COMPONENTS = $(LOG_DIR)/log.o
 
-# Graph dependencies
-GRAPH_OBJS = log.o graph_exceptions.o
+# Non-header graph dependencies
+GRAPH_OBJS = graph_exceptions.o
 
-.PHONY: log
-.PHONY: clean
+all: test
+.PHONY: all
 
-all: test test_vector log
+test: test.cpp graph.h graph.cpp node.cpp graph_exceptions.o $(LOG_COMPONENTS)
+	$(CXX) $(CXXFLAGS) $< $(GRAPH_OBJS) $(LOG_COMPONENTS) -o $@
 
-test: test.cpp graph.h graph.cpp node.cpp log.o graph_exceptions.o
-	$(CXX) $(CXXFLAGS) $< $(GRAPH_OBJS) -o $@
-
-test_vector: test_vector.cpp graph_vector.h graph_vector.cpp
-	$(CXX) $(CXXFLAGS) $^ -o test_logger
-
-log:
-	$(MAKE) -C $(LOG_DIR)
+$(LOG_DIR):
+	$(MAKE) -C $@
 
 %.o: %.cpp %.h
 	$(CXX) $(CXXFLAGS) $< -c -o $@
 
 clean:
-	rm -f *.o test test_logger test_vector
+	rm -f *.o test test_vector
+	$(MAKE) -C $(LOG_DIR) clean
+
+.PHONY: log
+.PHONY: clean
 

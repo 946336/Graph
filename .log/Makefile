@@ -8,5 +8,8 @@ test_logger: test_logger.cpp log.o
 	$(CXX) $(CXXFLAGS) $^ -o test_logger
 
 clean:
-	rm *.o test_logger
+	rm -f *.o test_logger
+
+.PHONY: clean
+.PHONY: all
 

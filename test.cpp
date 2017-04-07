@@ -21,9 +21,16 @@ int main(int argc, char** argv)
 
     g.connect(from, to);
     g.connect(from, from);
+    /* g.connect(from, big); */
 
     g.remove(big);
     /* g.remove(from); */
+
+    // Wheeeeeee
+    std::cout <<
+        g.neighborsOf(from).unwrap().filter([](int n){return n < 1000;}).find([](int){return true;}) << std::endl;
+
+    g.mask([](int){return true;});
 
     g.cleanup();
     g.print();

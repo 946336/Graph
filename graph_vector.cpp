@@ -1,5 +1,5 @@
-#ifndef GRAPH_VECTOR_946336_H
-#define GRAPH_VECTOR_946336_H
+#ifndef GRAPH_VECTOR_946336_CPP
+#define GRAPH_VECTOR_946336_CPP
 
 #include "graph_vector.h"
 
@@ -24,10 +24,22 @@ T& Vector<T, Alloc>::find(const Vector<T, Alloc>::predicate pred)
     throw NotFound("No element satisfying predicate found");
 }
 
-tempalte<typename T, class Alloc>
-const T& Vector<T, Alloc>::find(const Vector<T, Alloc>:predicate pred) const
+template<typename T, class Alloc>
+const T& Vector<T, Alloc>::find(const Vector<T, Alloc>::predicate pred) const
 {
     return this->find(pred);
+}
+
+template<typename T, class Alloc>
+Vector<T, Alloc> Vector<T, Alloc>::filter(const predicate pred) const
+{
+    Vector<T, Alloc> res;
+
+    for (const auto &elem : *this) {
+        if (pred(elem)) res.emplace_back(elem);
+    }
+
+    return res;
 }
 
 #endif

@@ -115,3 +115,8 @@ const std::string& Logger::name() const
     return this->name_;
 }
 
+Logger::Level Logger::level() const
+{
+    return this->level_;
+}
+

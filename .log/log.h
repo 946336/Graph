@@ -32,6 +32,8 @@ public:
     const std::string& name() const;
     Logger &rename(const std::string &name);
 
+    Level level() const;
+
     template<typename T>
     friend Logger& operator<< (Logger& logger, const T &to_log);
 
