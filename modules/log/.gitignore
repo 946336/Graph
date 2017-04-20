@@ -1,0 +1,6 @@
+
+*.o
+.*.sw*
+
+test_logger
+

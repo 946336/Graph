@@ -1,0 +1,4 @@
+# Log
+
+Simple logging facility
+
