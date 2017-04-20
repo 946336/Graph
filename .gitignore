@@ -2,13 +2,13 @@
 
 # cmake directories
 CMakeFiles/
-lib/
-bin/
+*/lib/*
+*/bin/*
 
 # cmake files
-CMakeCache.txt
+CMake*
 cmake_install.cmake
-Makefile
+*Makefile*
 
 # Object files
 *.o

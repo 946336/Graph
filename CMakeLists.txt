@@ -35,15 +35,17 @@ include_directories(include)
 # ==========================================================================
 
 # Logging
-include_directories(modules/log)
+include_directories(modules/log/include)
 
 # ==========================================================================
 # Define targets
 # ==========================================================================
 
-add_executable(test1 src/test.cpp modules/log/log.cpp src/graph_exceptions.cpp)
+add_executable(test1 test/src/test.cpp modules/log/src/log.cpp src/graph_exceptions.cpp)
 define_file_basename_for_sources(test1)
 target_compile_features(test1 PUBLIC cxx_lambdas)
+set_target_properties(test1 PROPERTIES RUNTIME_OUTPUT_DIRECTORY
+    ${CMAKE_BINARY_DIR}/test/bin)
 
-add_library(graph SHARED src/graph_exceptions.cpp modules/log/log.cpp)
+add_library(graph SHARED src/graph_exceptions.cpp modules/log/src/log.cpp)
 

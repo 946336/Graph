@@ -1,4 +1,4 @@
-#include "../includes/graph.h"
+#include "../include/graph.h"
 
 int main(int argc, char** argv)
 {

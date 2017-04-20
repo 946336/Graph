@@ -8,7 +8,7 @@
 #include <iostream>
 #include <stdexcept>
 
-#include "../modules/log/log.h"
+#include "../modules/log/include/log.h"
 
 #include "graph_exceptions.h"
 #include "graph_vector.h"

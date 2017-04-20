@@ -1,7 +1,7 @@
 #ifndef GRAPH_VECTOR_946336_CPP
 #define GRAPH_VECTOR_946336_CPP
 
-#include "../includes/graph_vector.h"
+#include "../include/graph_vector.h"
 
 // --------------------------------------------------------
 // Constructors are supposed to be inherited, so we omit
