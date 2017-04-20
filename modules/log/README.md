@@ -1,4 +1,0 @@
-# Log
-
-Simple logging facility
-
