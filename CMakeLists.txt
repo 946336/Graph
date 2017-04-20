@@ -17,10 +17,12 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 
 # ==========================================================================
-# Set flags
+# Set requirements and flags
 # ==========================================================================
 
-set(CMAKE_CXX_FLAGS "-Wall -Wextra -Werror -pedantic -std=c++14 -g -O2")
+set(CMAKE_CXX_FLAGS "-Wall -Wextra -Werror -pedantic -g -O2")
+
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # ==========================================================================
 # Include headers
@@ -41,6 +43,7 @@ include_directories(modules/log)
 
 add_executable(test1 src/test.cpp modules/log/log.cpp src/graph_exceptions.cpp)
 define_file_basename_for_sources(test1)
+target_compile_features(test1 PUBLIC cxx_lambdas)
 
 add_library(graph SHARED src/graph_exceptions.cpp modules/log/log.cpp)
 
