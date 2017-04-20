@@ -8,7 +8,7 @@
 #include <iostream>
 #include <stdexcept>
 
-#include "log/log.h"
+#include "../modules/log/log.h"
 
 #include "graph_exceptions.h"
 #include "graph_vector.h"
@@ -181,8 +181,8 @@ public:
 };
 
 // I prefer to keep implementations in separate files
-#include "graph.cpp"
-#include "node.cpp"
+#include "../src/graph.cpp"
+#include "../src/node.cpp"
 
 #endif
 

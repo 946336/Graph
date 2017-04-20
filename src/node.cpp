@@ -1,7 +1,7 @@
 #ifndef GRAPH_NODE_946336
 #define GRAPH_NODE_946336
 
-#include "graph.h"
+#include "../includes/graph.h"
 
 // Actually using Alloc is apparently painful and not quite possible
 // right now

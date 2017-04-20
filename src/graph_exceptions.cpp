@@ -1,4 +1,4 @@
-#include "graph_exceptions.h"
+#include "../includes/graph_exceptions.h"
 
 const char * const NoSuchNode::default_msg =
     "NoSuchNode: No node found satisfying predicate";

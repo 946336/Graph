@@ -1,0 +1,33 @@
+
+
+
+# cmake directories
+CMakeFiles/
+lib/
+bin/
+
+# cmake files
+CMakeCache.txt
+cmake_install.cmake
+Makefile
+
+# Binaries
+# test
+# test_logger
+# test_vector
+
+# Object files
+# *.o
+
+# Swap files (vim)
+.*.sw*
+
+# This .gitignore
+# .gitignore
+
+# YCM configuration files
+.ycm_extra_conf.py*
+
+# all git submodules
+modules/log
+

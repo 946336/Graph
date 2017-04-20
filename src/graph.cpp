@@ -1,8 +1,8 @@
 #ifndef GRAPH_GRAPH_946336_CPP
 #define GRAPH_GRAPH_946336_CPP
 
-#include "graph.h"
-#include "log/log.h"
+#include "../includes/graph.h"
+#include "../modules/log/log.h"
 
 #include <iostream>
 #include <stdexcept>
