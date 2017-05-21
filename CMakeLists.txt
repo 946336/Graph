@@ -29,6 +29,12 @@ set(CMAKE_CXX_FLAGS "-Wall -Wextra -Werror -pedantic -g -O2")
 include_directories(include)
 
 # ==========================================================================
+# Link libraries
+# ==========================================================================
+
+link_directories(${CMAKE_LIBRARY_OUTPUT_DIRECTORY})
+
+# ==========================================================================
 # Include from modules
 # ==========================================================================
 
@@ -39,11 +45,12 @@ include_directories(modules/log/include)
 # Define targets
 # ==========================================================================
 
-add_executable(test1 test/src/test.cpp modules/log/src/log.cpp src/graph_exceptions.cpp)
+add_library(graph SHARED src/graph_exceptions.cpp modules/log/src/log.cpp)
+
+add_executable(test1 test/src/test.cpp)
 define_file_basename_for_sources(test1)
 target_compile_features(test1 PUBLIC cxx_lambdas)
 set_target_properties(test1 PROPERTIES RUNTIME_OUTPUT_DIRECTORY
     ${CMAKE_BINARY_DIR}/test/bin)
-
-add_library(graph SHARED src/graph_exceptions.cpp modules/log/src/log.cpp)
+target_link_libraries(test1 graph)
 
